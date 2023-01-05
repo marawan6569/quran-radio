@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta content="width=device-width, initial-scale=1" name="viewport">
+        <title>Bootstrap demo</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+        <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
+              integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" rel="stylesheet">
+        <style>
+            body {
+                background-color: #F8F9FC !important;
+                direction: rtl;
+                font-family: "cairo",serif;
+            }
+            @media (max-width: 768px) {.card {width: 100%;}}
+            @media (min-width: 768px) {.card {width: 49%;}}
+            @media (min-width: 1200px) {.card {width: 32%;}}
+            @media (min-width: 1400px) {.card {width: 24%;}}
+            .card {
+                cursor: pointer;
+            }
+            .card:hover {
+                scale: 1.02;
+                z-index: 2;
+                box-shadow: 1px 2px 11px rgba(102, 129, 159, 0.25);
+            }
+            .card.active {
+                background: #E9EDF3;
+                color: #225084;
+                border: 1px solid #225084;
+            }
+
+            .current-radio {
+                display: flex;
+                flex-direction: row;
+                justify-content: space-between;
+                background: #FFFFFF;
+                border: 1px solid #dee2e6 !important;
+                box-shadow: 1px 2px 11px rgba(102, 129, 159, 0.06);
+                border-radius: 0.375rem !important;
+            }
+            .current-radio .radio-name {
+                font-weight: 600;
+                font-size: 20px;
+                line-height: 21px;
+                color: #225084;
+            }
+            .current-radio .radio-name:before {
+                content: "الإذاعة الحالية: ";
+                color: #22222280;
+            }
+            .current-radio .control {
+                width: 40px;
+                height: 40px;
+                border: 1px solid #222222;
+                border-radius: 50%;
+                text-align: center;
+                font-size: 24px;
+                cursor: pointer;
+            }
+        </style>
+        <title>Quran Radio</title>
+    </head>
+    <body>
+        <div class="container my-5">
+            <div class="row justify-content-between gap-2" id="radios">
+                <div class="col-12 p-4 current-radio">
+                    <div class="radio-name" id="current-radio-name">-</div>
+                    <div class="control" id="radio-controller" onclick="togglePlay()">⏵</div>
+                </div>
+            </div>
+        </div>
+
+        <script crossorigin="anonymous"
+                integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN"
+                src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+        <script>
+            const current_radio_name = document.querySelector('#current-radio-name'),
+                  radio_controller = document.querySelector('#radio-controller'),
+                  radios_container = document.querySelector('#radios'),
+                  radio_api_url = "https://mp3quran.net/api/radio/radio_ar.json",
+                  audio = new Audio(),
+                  play_icon = "⏵",
+                  pause_icon = "⏸";
+
+            async function getRadios(url){
+                const response = await fetch(url);
+                let data = await response.json();
+                if (response){
+                    showRadios(data["Radios"])
+                }
+            }
+
+            function showRadios(radios_list) {
+                for (const radioKey in radios_list) {
+                    let radio = `<div class="card radio" data-radio-url="${radios_list[radioKey]['URL']}" data-radio-name="${radios_list[radioKey]['Name']}"><div class="card-body">${radios_list[radioKey]['Name']}</div></div>`;
+                    radios_container.innerHTML += radio;
+                }
+                setEvents();
+            }
+
+            function setEvents() {
+                const radios = document.querySelectorAll('.radio')
+                radios.forEach(radio => {
+                    radio.addEventListener('click', () => {
+                        let radio_url = radio.getAttribute('data-radio-url');
+                        let radio_name = radio.getAttribute('data-radio-name');
+                        radios.forEach(radio => {radio.classList.remove('active')});
+                        radio.classList.add('active')
+                        playRadio(radio_url, radio_name)
+                    });
+                });
+            }
+
+            function playRadio(url, name) {
+                current_radio_name.innerHTML = name;
+                audio.src = url;
+                audio.play()
+            }
+
+            function togglePlay() {
+                if (audio.paused){
+                    audio.play();
+                    radio_controller.innerHTML = pause_icon;
+                }
+                else {
+                    audio.pause();
+                    radio_controller.innerHTML = play_icon;
+                }
+            }
+
+            getRadios(radio_api_url)
+        </script>
+    </body>
+</html>
